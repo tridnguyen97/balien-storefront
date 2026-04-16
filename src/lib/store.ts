@@ -1,3 +1,6 @@
+import { combineReducers, configureStore } from '@reduxjs/toolkit';
+import filtersReducer from './filtersSlice';
+
 export interface CartItem {
   id: string;
   title: string;
@@ -27,15 +30,20 @@ export const initialState: CartState = {
   items: [],
   total: 0,
   subtotal: 0,
-  shipping: 5.00,
-  tax: 0
+  shipping: 5.0,
+  tax: 0,
 };
 
-const store = {
+const rootReducer = combineReducers({
+  filters: filtersReducer,
+});
+
+const store = configureStore({
+  reducer: rootReducer,
   items: [],
   total: 0,
   subtotal: 0,
-  shipping: 5.00,
+  shipping: 5.0,
   tax: 0,
   getState() {
     return {
@@ -43,13 +51,17 @@ const store = {
       total: this.total,
       subtotal: this.subtotal,
       shipping: this.shipping,
-      tax: this.tax
+      tax: this.tax,
     };
   },
   subscribe: function (listener: () => void) {
     // Simple subscription logic
     return () => {};
-  }
-};
+  },
+});
+
+export type RootState = ReturnType<typeof store.getState>;
+export type AppDispatch = typeof store.dispatch;
+
 
 export default store;

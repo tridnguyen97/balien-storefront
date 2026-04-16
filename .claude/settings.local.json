@@ -1,5 +1,6 @@
 {
   "enabledPlugins": {
-    "ecommerce-storefront@medusa": true
+    "ecommerce-storefront@medusa": true,
+    "code-review@claude-plugins-official": true
   }
 }
