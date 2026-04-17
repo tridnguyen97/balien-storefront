@@ -1,5 +1,6 @@
 import { createAddItemAction, createRemoveItemAction, createUpdateQuantityAction, createClearCartAction, createAddItemsAction, createUpdateItemOptionsAction, createApplyCouponAction } from '../../lib/cartSlice';
 import { CartItem } from '../../lib/cartSlice';
+import { createCartItem, createProduct, sampleCartItems, sampleProduct } from './fixtures';
 
 describe('Cart Action Creator Tests', () => {
   describe('createAddItemAction', () => {

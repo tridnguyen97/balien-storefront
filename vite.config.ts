@@ -2,7 +2,8 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
 
-export default defineConfig({
+// https://vitejs.dev/config/
+export default defineConfig(({ mode }) => ({
   plugins: [react()],
 
   resolve: {
@@ -44,4 +45,32 @@ export default defineConfig({
       overlay: true,
     },
   },
-});
+
+  // Vitest configuration
+  test: {
+    environment: 'jsdom',
+    setupFiles: './src/setupTests.ts',
+    globals: true,
+    include: ['src/**/*.test.{ts,tsx}', 'src/**/*.spec.{ts,tsx}'],
+    exclude: ['src/**/*.cy.{ts,tsx}'],
+    css: true,
+    mockReset: true,
+    clearMocks: true,
+  },
+}));
+
+export function defineUserConfig(config) {
+  return defineConfig(({ mode }) => ({
+    ...config,
+    test: {
+      environment: 'jsdom',
+      setupFiles: './src/setupTests.ts',
+      globals: true,
+      include: ['src/**/*.test.{ts,tsx}', 'src/**/*.spec.{ts,tsx}'],
+      exclude: ['src/**/*.cy.{ts,tsx}'],
+      css: true,
+      mockReset: true,
+      clearMocks: true,
+    },
+  }));
+}
