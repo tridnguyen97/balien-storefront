@@ -1,10 +1,10 @@
-# Next.js
+# Vite 8
 
-A modern Next.js 15 application built with TypeScript and Tailwind CSS.
+A modern Vite 8 application built with TypeScript and Tailwind CSS.
 
 ## 🚀 Features
 
-- **Next.js 15** - Latest version with improved performance and features
+- **Vite 8** - Latest version with improved performance and fast HMR
 - **React 19** - Latest React version with enhanced capabilities
 - **Tailwind CSS** - Utility-first CSS framework for rapid UI development
 
@@ -23,29 +23,29 @@ A modern Next.js 15 application built with TypeScript and Tailwind CSS.
   # or
   yarn dev
   ```
-3. Open [http://localhost:4028](http://localhost:4028) with your browser to see the result.
+3. Open [http://localhost:5173](http://localhost:5173) with your browser to see the result.
 
 ## 📁 Project Structure
 
 ```
-nextjs/
+vite-app/
 ├── public/             # Static assets
 ├── src/
-│   ├── app/            # App router components
-│   │   ├── layout.tsx  # Root layout component
-│   │   └── page.tsx    # Main page component
+│   ├── main.tsx        # Main entry point
+│   ├── App.tsx         # Root component
 │   ├── components/     # Reusable UI components
 │   ├── styles/         # Global styles and Tailwind configuration
-├── next.config.mjs     # Next.js configuration
+├── index.html          # HTML entry point
 ├── package.json        # Project dependencies and scripts
 ├── postcss.config.js   # PostCSS configuration
-└── tailwind.config.js  # Tailwind CSS configuration
+├── tailwind.config.js  # Tailwind CSS configuration
+├── vite.config.ts      # Vite configuration
 
 ```
 
 ## 🧩 Page Editing
 
-You can start editing the page by modifying `src/app/page.tsx`. The page auto-updates as you edit the file.
+You can start editing the page by modifying `src/main.tsx` and `src/App.tsx`. The page auto-updates as you edit the file with fast HMR.
 
 ## 🎨 Styling
 
@@ -57,10 +57,9 @@ This project uses Tailwind CSS for styling with the following features:
 
 ## 📦 Available Scripts
 
-- `npm run dev` - Start development server on port 4028
+- `npm run dev` - Start development server on port 5173
 - `npm run build` - Build the application for production
-- `npm run start` - Start the development server
-- `npm run serve` - Start the production server
+- `npm run preview` - Preview production build locally
 - `npm run lint` - Run ESLint to check code quality
 - `npm run lint:fix` - Fix ESLint issues automatically
 - `npm run format` - Format code with Prettier
@@ -75,17 +74,20 @@ Build the application for production:
 
 ## 📚 Learn More
 
-To learn more about Next.js, take a look at the following resources:
+To learn more about Vite, take a look at the following resources:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial
+- [Vite Documentation](https://vitejs.dev/docs) - learn about Vite features and configuration
+- [Vite + React Guide](https://vitejs.dev/guide/react.html) - a guide for using Vite with React
 
-You can check out the [Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+You can check out the [Vite GitHub repository](https://github.com/vitejs/vite) - your feedback and contributions are welcome!
 
 ## 🙏 Acknowledgments
 
 - Built with [Rocket.new](https://rocket.new)
-- Powered by Next.js and React
+- Powered by Vite 8 and React
 - Styled with Tailwind CSS
 
-Built with ❤️ on Rocket.new
+
+## 📖 Changelog
+
+For a detailed list of changes, please refer to the [CHANGELOG.md](CHANGELOG.md) file.
