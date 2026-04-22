@@ -20,7 +20,7 @@ const OrderConfirmation: React.FC = () => {
       </div>
 
       <Link
-        to="/"
+        to="/products"
         className="bg-gold text-white px-6 py-3 rounded-lg font-medium hover:bg-gold-light transition-colors inline-flex items-center gap-2"
       >
         Continue Shopping
