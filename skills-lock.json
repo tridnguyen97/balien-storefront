@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "skills": {
+    "diagnose": {
+      "source": "sharpdeveye/maestro",
+      "sourceType": "github",
+      "computedHash": "451414ffa8635e5fdcc5f831444ae34c4fdd6f4aeda796ee29f7a27d89cc3fd3"
+    }
+  }
+}
