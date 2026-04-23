@@ -1,4 +1,4 @@
-import { CartItem } from '../lib/cartSlice';
+import { CartItem } from '../../lib/cartSlice';
 
 /**
  * Cart Item Factory - Creates valid cart items for testing
@@ -11,7 +11,6 @@ export const createCartItem = (overrides: Partial<CartItem> = {}): CartItem => (
   price: 1000,
   image: 'test.jpg',
   quantity: 1,
-  options: {},
   ...overrides,
 });
 
@@ -38,7 +37,6 @@ export const sampleCartItems: CartItem[] = [
     price: 1000,
     image: 'test1.jpg',
     quantity: 1,
-    options: {},
   },
   {
     id: 'item2',
@@ -47,7 +45,6 @@ export const sampleCartItems: CartItem[] = [
     price: 2000,
     image: 'test2.jpg',
     quantity: 2,
-    options: {},
   },
 ];
 

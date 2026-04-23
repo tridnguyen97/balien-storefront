@@ -69,4 +69,40 @@ const cartSlice = createSlice({
 });
 
 export const { setCartItems, addCartItem, removeCartItem, updateCartItemQuantity } = cartSlice.actions;
+
+// Action creators for test utilities
+export const createAddItemAction = (productId: string, quantity: number, options: Record<string, string> = {}) => ({
+  type: 'cart/addItem',
+  payload: { productId, quantity, options }
+});
+
+export const createRemoveItemAction = (itemId: string) => ({
+  type: 'cart/removeItem',
+  payload: { itemId }
+});
+
+export const createUpdateQuantityAction = (id: string, quantity: number) => ({
+  type: 'cart/updateQuantity',
+  payload: { id, quantity: Math.max(0, quantity) }
+});
+
+export const createClearCartAction = () => ({
+  type: 'cart/clear'
+});
+
+export const createAddItemsAction = (items: CartItem[]) => ({
+  type: 'cart/addItems',
+  payload: { items }
+});
+
+export const createUpdateItemOptionsAction = (itemId: string, options: Record<string, string>) => ({
+  type: 'cart/updateItemOptions',
+  payload: { itemId, options }
+});
+
+export const createApplyCouponAction = (code: string) => ({
+  type: 'cart/applyCoupon',
+  payload: { code }
+});
+
 export default cartSlice.reducer;
