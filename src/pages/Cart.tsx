@@ -234,12 +234,16 @@ const Cart: React.FC = () => {
             </div>
 
             <div className="mt-6 space-y-3">
-              <button className="w-full bg-gold text-white px-6 py-3 rounded-lg font-medium hover:bg-gold-light transition-colors">
-                Proceed to Checkout
-              </button>
-              <button className="w-full bg-transparent border border-[var(--ink-10)] text-foreground px-6 py-3 rounded-lg font-medium hover:bg-[var(--ink-05)] transition-colors">
-                Continue Shopping
-              </button>
+              <a href='/checkout'>
+                <button className="w-full bg-gold text-white px-6 py-3 rounded-lg font-medium hover:bg-gold-light transition-colors">
+                  Proceed to Checkout
+                </button>
+              </a>
+              <a href='/products'>
+                <button className="w-full bg-transparent border border-[var(--ink-10)] text-foreground px-6 py-3 rounded-lg font-medium hover:bg-[var(--ink-05)] transition-colors">
+                  Continue Shopping
+                </button>
+              </a>
             </div>
 
             <div className="mt-6 text-center">
