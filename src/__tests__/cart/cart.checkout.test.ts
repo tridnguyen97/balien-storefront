@@ -1,8 +1,9 @@
-import { render, screen, fireEvent } from '@testing-library/react';
-import { Provider } from 'react-redux';
+import { screen, fireEvent } from '@testing-library/react';
 import { configureStore } from '@reduxjs/toolkit';
 import cartReducer from '../../lib/cartSlice';
-import Checkout from '../../app/Checkout';
+import { renderWithProviders } from '../utils/test-utils';
+import Checkout from '../../pages/Checkout';
+import { Provider } from 'react';
 
 describe('Checkout Integration Tests', () => {
   let store: any;
@@ -39,10 +40,8 @@ describe('Checkout Integration Tests', () => {
   });
 
   it('renders checkout form elements', () => {
-    render(
-      <Provider store={store}>
+    renderWithProviders(
         <Checkout />
-      </Provider>
     );
 
     expect(screen.getByText('Order Summary')).toBeInTheDocument();
@@ -53,10 +52,8 @@ describe('Checkout Integration Tests', () => {
   });
 
   it('renders checkout buttons', () => {
-    render(
-      <Provider store={store}>
+    renderWithProviders(
         <Checkout />
-      </Provider>
     );
 
     expect(screen.getByText('Proceed to Checkout')).toBeInTheDocument();
@@ -64,10 +61,8 @@ describe('Checkout Integration Tests', () => {
   });
 
   it('renders contact information', () => {
-    render(
-      <Provider store={store}>
+    renderWithProviders(
         <Checkout />
-      </Provider>
     );
 
     expect(screen.getByText('Have questions?')).toBeInTheDocument();

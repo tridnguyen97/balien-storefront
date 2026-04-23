@@ -1,5 +1,5 @@
-import cartReducer, { CartItem, CartState } from '../../../lib/cartSlice';
-import { setCartItems, addCartItem, removeCartItem, updateCartItemQuantity } from '../../../lib/cartSlice';
+import cartReducer, { CartItem, CartState } from '../../lib/cartSlice';
+import { setCartItems, addCartItem, removeCartItem, updateCartItemQuantity } from '../../lib/cartSlice';
 
 describe('Cart Reducer Tests', () => {
   const initialState: CartState = {

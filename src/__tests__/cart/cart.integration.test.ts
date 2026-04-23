@@ -1,8 +1,8 @@
-import { render, screen, fireEvent } from '@testing-library/react';
-import { Provider } from 'react-redux';
+import { screen, fireEvent, render } from '@testing-library/react';
 import { configureStore } from '@reduxjs/toolkit';
 import cartReducer from '../../lib/cartSlice';
-import Cart from '../../app/Cart';
+import Cart from '../../pages/Cart';
+import { renderWithProviders } from '../utils/test-utils';
 
 describe('Cart Integration Tests', () => {
   let store: any;
@@ -52,10 +52,8 @@ describe('Cart Integration Tests', () => {
   });
 
   it('IT-001: Renders cart items correctly', () => {
-    render(
-      <Provider store={store}>
+    renderWithProviders(
         <Cart />
-      </Provider>
     );
 
     // Check item titles are rendered
@@ -72,10 +70,8 @@ describe('Cart Integration Tests', () => {
   });
 
   it('IT-002: Calculates totals correctly', () => {
-    render(
-      <Provider store={store}>
+    renderWithProviders(
         <Cart />
-      </Provider>
     );
 
     // Check subtotal
@@ -92,10 +88,8 @@ describe('Cart Integration Tests', () => {
   });
 
   it('IT-002: Updates quantity correctly', () => {
-    render(
-      <Provider store={store}>
+    renderWithProviders(
         <Cart />
-      </Provider>
     );
 
     // Find and click the increment button for the first item
@@ -107,10 +101,8 @@ describe('Cart Integration Tests', () => {
   });
 
   it('IT-002: Removes item correctly', () => {
-    render(
-      <Provider store={store}>
+    renderWithProviders(
         <Cart />
-      </Provider>
     );
 
     // Find and click the remove button for the first item
@@ -138,10 +130,8 @@ describe('Cart Integration Tests', () => {
       }
     });
 
-    render(
-      <Provider store={emptyStore}>
+    renderWithProviders(
         <Cart />
-      </Provider>
     );
 
     expect(screen.getByText('Your cart is empty')).toBeInTheDocument();
