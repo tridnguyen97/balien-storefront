@@ -1,15 +1,19 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
 :root {
-  --cotton: #f9f8f7;
-  --ink: #1a1a1a;
-  --ink-10: #e8e8e8;
-  --ink-05: #f5f5f5;
-  --gold: #c9a961;
-  --gold-light: #e8d69a;
-  --muted-dark: #666666;
+  --cotton: #F5F0EB;
+  --ink: #1A1A1A;
+  --gold: #C4A35A;
+  --gold-light: #D4B870;
+  --gray: #A39E97;
+  --gray-light: #D0CBC4;
+  --gray-dark: #6B6661;
+  --white: #FDFAF7;
+  --ink-80: rgba(26,26,26,0.8);
+  --ink-60: rgba(26,26,26,0.6);
+  --ink-20: rgba(26,26,26,0.2);
+  --ink-10: rgba(26,26,26,0.1);
+  --ink-05: rgba(26,26,26,0.05);
+  --gold-20: rgba(196,163,90,0.2);
+  --cotton-80: rgba(245,240,235,0.8);
   --background: var(--cotton);
   --foreground: var(--ink);
 }
