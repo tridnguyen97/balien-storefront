@@ -1,5 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { cartPersistenceMiddleware } from '../lib/cartSlice';
+import CartPersistenceService from '../lib/cartPersistence';
 
 interface CartItem {
   id: string;
@@ -27,7 +29,7 @@ interface Cart {
 }
 
 const Cart: React.FC = () => {
-  const [cart, setCart] = useState<Cart>({
+  const [cart, setCart] = React.useState<Cart>({
     items: [],
     total: 0,
     subtotal: 0,
@@ -36,10 +38,11 @@ const Cart: React.FC = () => {
   });
   const navigate = useNavigate();
 
+  // Load saved cart on mount
   useEffect(() => {
-    const savedCart = localStorage.getItem('brim-cart');
+    const savedCart = CartPersistenceService.loadCart();
     if (savedCart) {
-      setCart(JSON.parse(savedCart));
+      setCart(savedCart);
     } else {
       const mockCart: Cart = {
         items: [
@@ -79,8 +82,12 @@ const Cart: React.FC = () => {
         total: 518.00
       };
       setCart(mockCart);
-      localStorage.setItem('brim-cart', JSON.stringify(mockCart));
     }
+
+    // Setup persistence middleware
+    const unsubscribe = cartPersistenceMiddleware.subscribeToStore({ getState: () => ({ cart }) });
+
+    return () => unsubscribe();
   }, []);
 
   const updateQuantity = (id: string, newQuantity: number) => {
@@ -92,7 +99,6 @@ const Cart: React.FC = () => {
     updatedCart.subtotal = updatedItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
     updatedCart.total = updatedCart.subtotal + updatedCart.shipping + (updatedCart.subtotal * 0.08);
     setCart(updatedCart);
-    localStorage.setItem('brim-cart', JSON.stringify(updatedCart));
   };
 
   const removeItem = (id: string) => {
@@ -101,7 +107,6 @@ const Cart: React.FC = () => {
     updatedCart.subtotal = updatedItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
     updatedCart.total = updatedCart.subtotal + updatedCart.shipping + (updatedCart.subtotal * 0.08);
     setCart(updatedCart);
-    localStorage.setItem('brim-cart', JSON.stringify(updatedCart));
   };
 
   if (cart.items.length === 0) {
@@ -134,7 +139,7 @@ const Cart: React.FC = () => {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 md:px-10 pb-16 grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="max-w-7xl mx-auto px-6 md:px-10 grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-4">
           {cart.items.map((item) => (
             <div

@@ -1,4 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import CartPersistenceService, { CartData } from './cartPersistence';
 
 export interface CartItem {
   id: string;
@@ -106,3 +107,53 @@ export const createApplyCouponAction = (code: string) => ({
 });
 
 export default cartSlice.reducer;
+
+// Cart Persistence Middleware
+export const cartPersistenceMiddleware = {
+  /**
+   * Subscribe to store changes and persist cart state
+   */
+  subscribeToStore: (store: any) => {
+    let currentState = store.getState();
+
+    const unsubscribe = store.subscribe(() => {
+      const nextState = store.getState();
+
+      // Check if cart state has changed
+      if (
+        currentState.cart.items !== nextState.cart.items ||
+        currentState.cart.total !== nextState.cart.total ||
+        currentState.cart.subtotal !== nextState.cart.subtotal
+      ) {
+        // Persist the entire cart state
+        const cartData: CartData = {
+          items: nextState.cart.items,
+          total: nextState.cart.total,
+          subtotal: nextState.cart.subtotal,
+          shipping: nextState.cart.shipping,
+          tax: nextState.cart.tax,
+          discount: nextState.cart.discount
+        };
+
+        try {
+          CartPersistenceService.saveCart(cartData);
+          currentState = nextState;
+        } catch (error) {
+          console.warn('Cart persistence failed:', error);
+        }
+      }
+    });
+
+    return unsubscribe;
+  },
+
+  /**
+   * Load saved cart state into store
+   */
+  loadSavedCart: (store: any) => {
+    const savedCart = CartPersistenceService.loadCart();
+    if (savedCart) {
+      store.dispatch(setCartItems(savedCart.items));
+    }
+  }
+};

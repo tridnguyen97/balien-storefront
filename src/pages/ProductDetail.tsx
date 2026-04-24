@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import CartPersistenceService from '../lib/cartPersistence';
 
 interface Variant {
   options: { [key: string]: string };
@@ -73,20 +74,26 @@ const ProductDetail: React.FC = () => {
       discount: 0
     };
 
-    let cart = localStorage.getItem('brim-cart');
-    let cartObj = cart ? JSON.parse(cart) : { items: [], subtotal: 0, shipping: 5.00, tax: 0, total: 0 };
+    let cart = CartPersistenceService.loadCart();
 
-    const existingItemIndex = cartObj.items.findIndex((item: any) => item.id === cartItem.id && item.variant?.sku === cartItem.variant?.sku);
-    if (existingItemIndex > -1) {
-      cartObj.items[existingItemIndex].quantity += cartItem.quantity;
-    } else {
-      cartObj.items.push(cartItem);
+    if (!cart) {
+      cart = { items: [], subtotal: 0, shipping: 5.00, tax: 0, total: 0 };
     }
 
-    cartObj.subtotal = cartObj.items.reduce((sum: any, item: any) => sum + (item.price * item.quantity), 0);
-    cartObj.total = cartObj.subtotal + cartObj.shipping + (cartObj.subtotal * 0.08);
+    const existingItemIndex = cart.items.findIndex((item: any) =>
+      item.id === cartItem.id && item.variant?.sku === cartItem.variant?.sku
+    );
 
-    localStorage.setItem('brim-cart', JSON.stringify(cartObj));
+    if (existingItemIndex > -1) {
+      cart.items[existingItemIndex].quantity += cartItem.quantity;
+    } else {
+      cart.items.push(cartItem);
+    }
+
+    cart.subtotal = cart.items.reduce((sum: any, item: any) => sum + (item.price * item.quantity), 0);
+    cart.total = cart.subtotal + cart.shipping + (cart.subtotal * 0.08);
+
+    CartPersistenceService.saveCart(cart);
     alert('Added to cart!');
   };
 
@@ -139,6 +146,7 @@ const ProductDetail: React.FC = () => {
                 src={product.image}
                 alt={product.title}
                 className="object-cover w-full h-full"
+                loading="lazy"
               />
             </div>
             <div className="grid grid-cols-3 gap-3">
@@ -161,17 +169,15 @@ const ProductDetail: React.FC = () => {
             </div>
 
             <div>
-              <p className="text-muted-dark text-sm leading-relaxed">
-                {product.description}
-              </p>
+              <p className="text-muted-dark text-sm leading-relaxed">{product.description}</p>
             </div>
 
-            <div className="flex items-baseline gap-3 mb-6">
+            <div className="flex items-baseline mb-6">
               <span className="font-display italic text-4xl font-light text-gold">
                 ${product.price.toFixed(2)}
               </span>
               {product.original_price && (
-                <span className="text-lg text-muted-dark line-through">
+                <span className="text-lg text-muted-dark line-through ml-3">
                   ${product.original_price.toFixed(2)}
                 </span>
               )}
