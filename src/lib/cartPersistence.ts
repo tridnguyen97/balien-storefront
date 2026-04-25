@@ -1,5 +1,12 @@
 import { CartItem } from './cartSlice';
 
+export interface CartMetadata {
+  version: number;
+  createdAt: string;
+  updatedAt: string;
+  expiresAt?: string;
+}
+
 export interface CartData {
   items: CartItem[];
   subtotal: number;
@@ -7,19 +14,63 @@ export interface CartData {
   tax: number;
   total: number;
   discount?: number;
+  metadata?: CartMetadata;
 }
+
+const CART_VERSION = 1;
+const CART_EXPIRATION_DAYS = 30;
 
 export class CartPersistenceService {
   private static STORAGE_KEY = 'brim-cart';
+
+  /**
+   * Check if running in browser environment
+   */
+  private static isClient(): boolean {
+    return typeof window !== 'undefined' && typeof window.localStorage !== 'undefined';
+  }
+
+  /**
+   * Generate cart metadata
+   */
+  private static createMetadata(existingMetadata?: CartMetadata): CartMetadata {
+    const now = new Date().toISOString();
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + CART_EXPIRATION_DAYS);
+
+    return {
+      version: CART_VERSION,
+      createdAt: existingMetadata?.createdAt || now,
+      updatedAt: now,
+      expiresAt: expiresAt.toISOString()
+    };
+  }
+
+  /**
+   * Check if cart has expired
+   */
+  private static isExpired(metadata?: CartMetadata): boolean {
+    if (!metadata?.expiresAt) return false;
+    return new Date(metadata.expiresAt) < new Date();
+  }
 
   /**
    * Save cart data to localStorage with validation
    * @param cart - Cart data to persist
    */
   static saveCart(cart: CartData): void {
+    if (!this.isClient()) {
+      console.warn('Cannot save cart: not in browser environment');
+      return;
+    }
+
     try {
       const validatedCart = this.validateCartData(cart);
-      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(validatedCart));
+      const cartWithMetadata: CartData = {
+        ...validatedCart,
+        metadata: this.createMetadata(cart.metadata)
+      };
+      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(cartWithMetadata));
     } catch (error) {
       console.error('Failed to save cart:', error);
       // Fallback: clear corrupted data
@@ -30,15 +81,29 @@ export class CartPersistenceService {
 
   /**
    * Load cart data from localStorage with validation
-   * @returns Cart data or null if not found/invalid
+   * @returns Cart data or null if not found/invalid/expired
    */
   static loadCart(): CartData | null {
+    if (!this.isClient()) {
+      console.warn('Cannot load cart: not in browser environment');
+      return null;
+    }
+
     try {
       const saved = localStorage.getItem(this.STORAGE_KEY);
       if (!saved) return null;
 
       const parsed = JSON.parse(saved);
-      return this.validateCartData(parsed);
+      const validated = this.validateCartData(parsed);
+
+      // Check expiration
+      if (this.isExpired(validated.metadata)) {
+        console.log('Cart expired, clearing...');
+        this.clearCart();
+        return null;
+      }
+
+      return validated;
     } catch (error) {
       console.error('Failed to load cart:', error);
       return null;
@@ -49,7 +114,20 @@ export class CartPersistenceService {
    * Clear cart data from localStorage
    */
   static clearCart(): void {
+    if (!this.isClient()) {
+      console.warn('Cannot clear cart: not in browser environment');
+      return;
+    }
     localStorage.removeItem(this.STORAGE_KEY);
+  }
+
+  /**
+   * Check if localStorage quota is exceeded
+   */
+  private static isQuotaExceededError(error: Error): boolean {
+    return error.name === 'QuotaExceededError' ||
+           error.name === 'NS_QUOTA_EXCEEDED_ERR' ||
+           error.message?.toLowerCase().includes('quota');
   }
 
   /**

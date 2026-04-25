@@ -123,7 +123,8 @@ export const cartPersistenceMiddleware = {
       if (
         currentState.cart.items !== nextState.cart.items ||
         currentState.cart.total !== nextState.cart.total ||
-        currentState.cart.subtotal !== nextState.cart.subtotal
+        currentState.cart.subtotal !== nextState.cart.subtotal ||
+        currentState.cart.tax !== nextState.cart.tax
       ) {
         // Persist the entire cart state
         const cartData: CartData = {

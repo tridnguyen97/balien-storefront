@@ -8,14 +8,8 @@ import ProductDetail from '../pages/ProductDetail';
 import Cart from '../pages/Cart';
 import Checkout from '../pages/Checkout';
 import OrderConfirmation from '../pages/OrderConfirmation';
-import { CartItem } from '../lib/store';
 
-interface AppProps {
-  cart: CartItem[];
-  setCart: React.Dispatch<React.SetStateAction<CartItem[]>>;
-}
-
-const App: React.FC<AppProps> = ({ cart, setCart }) => {
+const App: React.FC = () => {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Header />
@@ -24,7 +18,7 @@ const App: React.FC<AppProps> = ({ cart, setCart }) => {
           <Route path="/" element={<Home />} />
           <Route path="/products" element={<Products />} />
           <Route path="/products/:handle" element={<ProductDetail />} />
-          <Route path="/cart" element={<Cart cart={cart} setCart={setCart} />} />
+          <Route path="/cart" element={<Cart />} />
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/order-confirmation" element={<OrderConfirmation />} />
           <Route path="*" element={<Navigate to="/" replace />} />
