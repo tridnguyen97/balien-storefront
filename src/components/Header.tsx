@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import { RootState } from '../lib/store';
 
 interface Category {
   id: string;
@@ -11,6 +13,12 @@ const Header: React.FC = () => {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
+
+  // Get cart items from Redux store
+  const cartItems = useSelector((state: RootState) => state.cart.items);
+
+  // Calculate total item count
+  const itemCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 80);
@@ -87,11 +95,13 @@ const Header: React.FC = () => {
                   (e.currentTarget.style.color = scrolled ? 'var(--muted-dark)' : 'rgba(245,240,235,0.7)')
                 }
               >
-                Cart
-                <span className="absolute -top-2 -right-6 bg-red-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                  2
-                </span>
-              </Link>
+  Cart
+  {itemCount > 0 && (
+    <span className="absolute -top-2 -right-6 bg-red-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center min-w-[1.25rem]">
+      {itemCount > 9 ? '9+' : itemCount}
+    </span>
+  )}
+</Link>
             </li>
           </ul>
         </div>
@@ -156,14 +166,19 @@ const Header: React.FC = () => {
           >
             Collection
           </Link>
-          <Link
-            to="/cart"
-            className="text-sm font-medium tracking-wider uppercase"
-            style={{ color: 'var(--muted-dark)' }}
-            onClick={() => setMenuOpen(false)}
-          >
-            Cart
-          </Link>
+      <Link
+        to="/cart"
+        className="text-sm font-medium tracking-wider uppercase inline-flex items-center gap-2"
+        style={{ color: 'var(--muted-dark)' }}
+        onClick={() => setMenuOpen(false)}
+      >
+        Cart
+        {itemCount > 0 && (
+          <span className="bg-red-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center min-w-[1.25rem]">
+            {itemCount > 9 ? '9+' : itemCount}
+          </span>
+        )}
+      </Link>
           <Link
             to="/fitting"
             className="btn-gold text-center mt-2"
