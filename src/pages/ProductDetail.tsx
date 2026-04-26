@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import CartPersistenceService from '../lib/cartPersistence';
+import { useDispatch } from 'react-redux';
+import { addCartItem } from '../lib/cartSlice';
 
 interface Variant {
   options: { [key: string]: string };
@@ -25,6 +26,7 @@ interface Product {
 const ProductDetail: React.FC = () => {
   const { handle } = useParams<{ handle: string }>();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [product, setProduct] = useState<Product | null>(null);
   const [selectedVariant, setSelectedVariant] = useState<Variant | null>(null);
   const [quantity, setQuantity] = useState<number>(1);
@@ -62,38 +64,22 @@ const ProductDetail: React.FC = () => {
       return;
     }
 
+    if (!product) return;
+
     const cartItem = {
-      id: product?.id || '',
-      title: product?.title || '',
-      handle: product?.handle || '',
+      id: product.id,
+      title: product.title,
+      handle: product.handle,
       price: selectedVariant.price,
-      original_price: product?.original_price,
-      image: product?.image || '',
+      original_price: product.original_price,
+      image: product.image,
       quantity: quantity,
       variant: selectedVariant,
       discount: 0
     };
 
-    let cart = CartPersistenceService.loadCart();
-
-    if (!cart) {
-      cart = { items: [], subtotal: 0, shipping: 5.00, tax: 0, total: 0 };
-    }
-
-    const existingItemIndex = cart.items.findIndex((item: any) =>
-      item.id === cartItem.id && item.variant?.sku === cartItem.variant?.sku
-    );
-
-    if (existingItemIndex > -1) {
-      cart.items[existingItemIndex].quantity += cartItem.quantity;
-    } else {
-      cart.items.push(cartItem);
-    }
-
-    cart.subtotal = cart.items.reduce((sum: any, item: any) => sum + (item.price * item.quantity), 0);
-    cart.total = cart.subtotal + cart.shipping + (cart.subtotal * 0.08);
-
-    CartPersistenceService.saveCart(cart);
+    // Dispatch to Redux - middleware handles persistence and state updates
+    dispatch(addCartItem(cartItem));
     alert('Added to cart!');
   };
 
