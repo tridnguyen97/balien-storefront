@@ -60,7 +60,7 @@ describe('Checkout Integration Tests', () => {
     expect(screen.getByText('Edit Cart')).toBeInTheDocument();
   });
 
-  it('proceeds to payment step', () => {
+  it('proceeds to payment step', async () => {
     renderWithProviders(
       <Checkout />,
       { store }
@@ -73,12 +73,28 @@ describe('Checkout Integration Tests', () => {
     const nameInput = screen.getByPlaceholderText('Full Name');
     fireEvent.change(nameInput, { target: { value: 'John Doe' } });
     
-    const nextButton = screen.getByText('Next: Payment');
+    const emailInput = screen.getByPlaceholderText('Email Address');
+    fireEvent.change(emailInput, { target: { value: 'john@example.com' } });
+    
+    const addressInput = screen.getByPlaceholderText('Street Address');
+    fireEvent.change(addressInput, { target: { value: '123 Main St' } });
+    
+    const cityInput = screen.getByPlaceholderText('City');
+    fireEvent.change(cityInput, { target: { value: 'Anytown' } });
+    
+    const zipInput = screen.getByPlaceholderText('ZIP Code');
+    fireEvent.change(zipInput, { target: { value: '12345' } });
+    
+    const countrySelect = screen.getByRole('combobox') as HTMLSelectElement;
+    fireEvent.change(countrySelect, { target: { value: 'US' } });
+    
+    // Submit the form by clicking the button
+    const nextButton = screen.getByRole('button', { name: /next: payment/i });
     fireEvent.click(nextButton);
     
-    // Should show payment step
-    expect(screen.getByText('Payment Information')).toBeInTheDocument();
+    // Should show payment step - wait for the transition
+    expect(await screen.findByText('Payment Information')).toBeInTheDocument();
     expect(screen.getByPlaceholderText('Cardholder Name')).toBeInTheDocument();
-    expect(screen.getByText('Review Order')).toBeInTheDocument();
+    expect(await screen.findByText('Review Order')).toBeInTheDocument();
   });
 });

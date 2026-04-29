@@ -1,14 +1,15 @@
-import React, { Suspense } from 'react';
+import React, { Suspense, lazy } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import ErrorBoundary from '../components/ErrorBoundary';
-import Home from '../pages/Home';
-import Products from '../pages/Products';
-import ProductDetail from '../pages/ProductDetail';
-import Cart from '../pages/Cart';
-import Checkout from '../pages/Checkout';
-import OrderConfirmation from '../pages/OrderConfirmation';
+
+const Home = lazy(() => import('../pages/Home'));
+const Products = lazy(() => import('../pages/Products'));
+const ProductDetail = lazy(() => import('../pages/ProductDetail'));
+const Cart = lazy(() => import('../pages/Cart'));
+const Checkout = lazy(() => import('../pages/Checkout'));
+const OrderConfirmation = lazy(() => import('../pages/OrderConfirmation'));
 
 const App: React.FC = () => {
   return (

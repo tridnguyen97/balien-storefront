@@ -9,7 +9,7 @@ interface Category {
   slug: string;
 }
 
-const Header: React.FC = () => {
+});
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -187,9 +187,9 @@ const Header: React.FC = () => {
             Book a Fitting
           </Link>
         </div>
-      )}
-    </nav>
-  );
-};
-
-export default Header;
+         )}
+       </nav>
+     );
+ };
+ 
+ export default React.memo(Header);

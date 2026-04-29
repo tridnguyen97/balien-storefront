@@ -13,8 +13,9 @@ export default defineConfig(({ mode }) => ({
   },
 
   build: {
-    target: 'baseline-widely-available',
-    sourcemap: false,
+    target: 'es2020', // Better targeting for modern browsers
+    sourcemap: false, // Disable source maps in production for smaller bundles
+    minify: 'esbuild', // Use esbuild for faster minification
     chunkSizeWarningLimit: 500,
     rollupOptions: {
       output: {
@@ -26,17 +27,48 @@ export default defineConfig(({ mode }) => ({
           'vendor-router': ['react-router-dom'],
 
           // State management
-          // 'vendor-state': ['zustand', '@tanstack/react-query'],
+          'vendor-state': [
+            '@reduxjs/toolkit',
+            'react-redux',
+            '@tanstack/react-query'
+          ],
 
-          // UI library (if using)
-          // 'vendor-ui': ['@headlessui/react', '@heroicons/react'],
+          // UI library (Ant Design)
+          'vendor-ui': [
+            'antd',
+            '@ant-design/icons'
+          ],
+
+          // Form validation
+          'vendor-form': [
+            'react-hook-form',
+            'zod',
+            '@hookform/resolvers/zod'
+          ],
+
+          // Vendor - other commonly used libraries
+          'vendor-other': [
+            'lodash',
+            'date-fns'
+          ]
         },
       },
     },
   },
 
   optimizeDeps: {
-    include: ['react', 'react-dom'],
+    include: [
+      'react',
+      'react-dom',
+      '@reduxjs/toolkit',
+      'react-redux',
+      '@tanstack/react-query',
+      'antd',
+      '@ant-design/icons',
+      'react-hook-form',
+      'zod',
+      '@hookform/resolvers/zod'
+    ],
   },
 
   server: {
