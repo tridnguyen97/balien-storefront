@@ -1,107 +1,36 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
-
-interface CartItem {
-  id: string;
-  title: string;
-  handle: string;
-  price: number;
-  original_price?: number;
-  image: string;
-  quantity: number;
-  variant?: {
-    options: { [key: string]: string };
-    price: number;
-    sku: string;
-  };
-  discount?: number;
-}
-
-interface Cart {
-  items: CartItem[];
-  total: number;
-  subtotal: number;
-  discount?: number;
-  shipping: number;
-  tax: number;
-}
+import { useSelector, useDispatch } from 'react-redux';
+import { RootState } from '../lib/store';
+import {
+  removeCartItem,
+  updateCartItemQuantity,
+  setCartItems,
+} from '../lib/cartSlice';
+import CartPersistenceService from '../lib/cartPersistence';
 
 const Cart: React.FC = () => {
-  const [cart, setCart] = useState<Cart>({
-    items: [],
-    total: 0,
-    subtotal: 0,
-    shipping: 5.00,
-    tax: 0
-  });
+  const dispatch = useDispatch();
   const navigate = useNavigate();
+  const cart = useSelector((state: RootState) => state.cart);
 
-  useEffect(() => {
-    const savedCart = localStorage.getItem('brim-cart');
-    if (savedCart) {
-      setCart(JSON.parse(savedCart));
-    } else {
-      const mockCart: Cart = {
-        items: [
-          {
-            id: 'prod_hat_001',
-            title: 'Elegant Sinamai Fascinator',
-            handle: 'elegant-hat-001',
-            price: 185.00,
-            original_price: 220.00,
-            image: '/mock-product-1.jpg',
-            quantity: 1,
-            variant: {
-              options: { Color: 'Ivory', Size: 'One Size' },
-              price: 185.00,
-              sku: 'HAT-IV-001'
-            },
-            discount: 35.00
-          },
-          {
-            id: 'prod_hat_002',
-            title: 'Vintage Cocktail Hat',
-            handle: 'vintage-hat-002',
-            price: 145.00,
-            image: '/mock-product-2.jpg',
-            quantity: 2,
-            variant: {
-              options: { Color: 'Black', Size: 'One Size' },
-              price: 145.00,
-              sku: 'HAT-BK-002'
-            },
-            discount: 30.00
-          }
-        ],
-        subtotal: 475.00,
-        shipping: 5.00,
-        tax: 38.00,
-        total: 518.00
-      };
-      setCart(mockCart);
-      localStorage.setItem('brim-cart', JSON.stringify(mockCart));
+  // Load saved cart on mount (in case Redux store was empty)
+  React.useEffect(() => {
+    if (cart.items.length === 0) {
+      const savedCart = CartPersistenceService.loadCart();
+      if (savedCart && savedCart.items.length > 0) {
+        dispatch(setCartItems(savedCart.items));
+      }
     }
-  }, []);
+  }, [dispatch, cart.items.length]);
 
   const updateQuantity = (id: string, newQuantity: number) => {
     if (newQuantity < 1) return;
-    const updatedItems = cart.items.map(item =>
-      item.id === id ? { ...item, quantity: newQuantity } : item
-    );
-    const updatedCart = { ...cart, items: updatedItems };
-    updatedCart.subtotal = updatedItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    updatedCart.total = updatedCart.subtotal + updatedCart.shipping + (updatedCart.subtotal * 0.08);
-    setCart(updatedCart);
-    localStorage.setItem('brim-cart', JSON.stringify(updatedCart));
+    dispatch(updateCartItemQuantity({ id, quantity: newQuantity }));
   };
 
   const removeItem = (id: string) => {
-    const updatedItems = cart.items.filter(item => item.id !== id);
-    const updatedCart = { ...cart, items: updatedItems };
-    updatedCart.subtotal = updatedItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    updatedCart.total = updatedCart.subtotal + updatedCart.shipping + (updatedCart.subtotal * 0.08);
-    setCart(updatedCart);
-    localStorage.setItem('brim-cart', JSON.stringify(updatedCart));
+    dispatch(removeCartItem(id));
   };
 
   if (cart.items.length === 0) {
@@ -134,7 +63,7 @@ const Cart: React.FC = () => {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 md:px-10 pb-16 grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="max-w-7xl mx-auto px-6 md:px-10 grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-4">
           {cart.items.map((item) => (
             <div
@@ -234,12 +163,16 @@ const Cart: React.FC = () => {
             </div>
 
             <div className="mt-6 space-y-3">
-              <button className="w-full bg-gold text-white px-6 py-3 rounded-lg font-medium hover:bg-gold-light transition-colors">
-                Proceed to Checkout
-              </button>
-              <button className="w-full bg-transparent border border-[var(--ink-10)] text-foreground px-6 py-3 rounded-lg font-medium hover:bg-[var(--ink-05)] transition-colors">
-                Continue Shopping
-              </button>
+              <a href='/checkout'>
+                <button className="w-full bg-gold text-white px-6 py-3 rounded-lg font-medium hover:bg-gold-light transition-colors">
+                  Proceed to Checkout
+                </button>
+              </a>
+              <a href='/products'>
+                <button className="w-full bg-transparent border border-[var(--ink-10)] text-foreground px-6 py-3 rounded-lg font-medium hover:bg-[var(--ink-05)] transition-colors">
+                  Continue Shopping
+                </button>
+              </a>
             </div>
 
             <div className="mt-6 text-center">

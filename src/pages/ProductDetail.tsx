@@ -1,5 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { message } from 'antd';
+import { addCartItem } from '../lib/cartSlice';
 
 interface Variant {
   options: { [key: string]: string };
@@ -24,6 +27,8 @@ interface Product {
 const ProductDetail: React.FC = () => {
   const { handle } = useParams<{ handle: string }>();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const [messageApi, contextHolder] = message.useMessage();
   const [product, setProduct] = useState<Product | null>(null);
   const [selectedVariant, setSelectedVariant] = useState<Variant | null>(null);
   const [quantity, setQuantity] = useState<number>(1);
@@ -57,37 +62,27 @@ const ProductDetail: React.FC = () => {
 
   const addToCart = () => {
     if (!selectedVariant) {
-      alert('Please select a variant');
+      messageApi.warning({ content: 'Please select a variant' });
       return;
     }
 
+    if (!product) return;
+
     const cartItem = {
-      id: product?.id || '',
-      title: product?.title || '',
-      handle: product?.handle || '',
+      id: product.id,
+      title: product.title,
+      handle: product.handle,
       price: selectedVariant.price,
-      original_price: product?.original_price,
-      image: product?.image || '',
+      original_price: product.original_price,
+      image: product.image,
       quantity: quantity,
       variant: selectedVariant,
       discount: 0
     };
 
-    let cart = localStorage.getItem('brim-cart');
-    let cartObj = cart ? JSON.parse(cart) : { items: [], subtotal: 0, shipping: 5.00, tax: 0, total: 0 };
-
-    const existingItemIndex = cartObj.items.findIndex((item: any) => item.id === cartItem.id && item.variant?.sku === cartItem.variant?.sku);
-    if (existingItemIndex > -1) {
-      cartObj.items[existingItemIndex].quantity += cartItem.quantity;
-    } else {
-      cartObj.items.push(cartItem);
-    }
-
-    cartObj.subtotal = cartObj.items.reduce((sum: any, item: any) => sum + (item.price * item.quantity), 0);
-    cartObj.total = cartObj.subtotal + cartObj.shipping + (cartObj.subtotal * 0.08);
-
-    localStorage.setItem('brim-cart', JSON.stringify(cartObj));
-    alert('Added to cart!');
+    // Dispatch to Redux - middleware handles persistence and state updates
+    dispatch(addCartItem(cartItem));
+    messageApi.success({ content: 'Added to cart!' });
   };
 
   if (loading) {
@@ -119,6 +114,7 @@ const ProductDetail: React.FC = () => {
 
   return (
     <>
+      {contextHolder}
       <div className="bg-[var(--cotton)] border-b border-[var(--ink-10)] py-4 mb-8">
         <div className="max-w-7xl mx-auto px-6 md:px-10">
           <div className="text-sm tracking-wide">
@@ -139,6 +135,7 @@ const ProductDetail: React.FC = () => {
                 src={product.image}
                 alt={product.title}
                 className="object-cover w-full h-full"
+                loading="lazy"
               />
             </div>
             <div className="grid grid-cols-3 gap-3">
@@ -161,17 +158,15 @@ const ProductDetail: React.FC = () => {
             </div>
 
             <div>
-              <p className="text-muted-dark text-sm leading-relaxed">
-                {product.description}
-              </p>
+              <p className="text-muted-dark text-sm leading-relaxed">{product.description}</p>
             </div>
 
-            <div className="flex items-baseline gap-3 mb-6">
+            <div className="flex items-baseline mb-6">
               <span className="font-display italic text-4xl font-light text-gold">
                 ${product.price.toFixed(2)}
               </span>
               {product.original_price && (
-                <span className="text-lg text-muted-dark line-through">
+                <span className="text-lg text-muted-dark line-through ml-3">
                   ${product.original_price.toFixed(2)}
                 </span>
               )}

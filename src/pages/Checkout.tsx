@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { message } from 'antd';
 
 const Checkout: React.FC = () => {
   const navigate = useNavigate();
@@ -24,8 +25,9 @@ const Checkout: React.FC = () => {
       setStep('review');
     } else {
       // Complete order
-      alert('Order placed successfully!');
+      message.success('Order placed successfully!');
       localStorage.removeItem('brim-cart');
+      localStorage.removeItem('cart_id'); // Also clear Medusa cart ID
       navigate('/order-confirmation');
     }
   };
