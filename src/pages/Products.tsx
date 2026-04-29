@@ -84,6 +84,9 @@ const Products: React.FC = () => {
 
   return (
     <>
+      {/* Spacer for fixed header: h-16 (64px) mobile, h-20 (80px) desktop */}
+      <div className="h-16 md:h-20" />
+
       <FittingSection />
 
       <section className="max-w-7xl mx-auto px-6 md:px-10 pb-16">

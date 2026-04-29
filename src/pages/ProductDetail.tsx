@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
+import { message } from 'antd';
 import { addCartItem } from '../lib/cartSlice';
 
 interface Variant {
@@ -27,6 +28,7 @@ const ProductDetail: React.FC = () => {
   const { handle } = useParams<{ handle: string }>();
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const [messageApi, contextHolder] = message.useMessage();
   const [product, setProduct] = useState<Product | null>(null);
   const [selectedVariant, setSelectedVariant] = useState<Variant | null>(null);
   const [quantity, setQuantity] = useState<number>(1);
@@ -60,7 +62,7 @@ const ProductDetail: React.FC = () => {
 
   const addToCart = () => {
     if (!selectedVariant) {
-      alert('Please select a variant');
+      messageApi.warning({ content: 'Please select a variant' });
       return;
     }
 
@@ -80,7 +82,7 @@ const ProductDetail: React.FC = () => {
 
     // Dispatch to Redux - middleware handles persistence and state updates
     dispatch(addCartItem(cartItem));
-    alert('Added to cart!');
+    messageApi.success({ content: 'Added to cart!' });
   };
 
   if (loading) {
@@ -112,6 +114,7 @@ const ProductDetail: React.FC = () => {
 
   return (
     <>
+      {contextHolder}
       <div className="bg-[var(--cotton)] border-b border-[var(--ink-10)] py-4 mb-8">
         <div className="max-w-7xl mx-auto px-6 md:px-10">
           <div className="text-sm tracking-wide">

@@ -47,8 +47,9 @@ describe('Cart Reducer Tests', () => {
       const state = cartReducer(initialState, setCartItems(testItems));
 
       expect(state.items).toEqual(testItems);
-      expect(state.total).toBe(5000); // 1000*1 + 2000*2
-      expect(state.subtotal).toBe(5000);
+      expect(state.subtotal).toBe(5000); // 1000*1 + 2000*2
+      expect(state.tax).toBe(400); // 8% of subtotal
+      expect(state.total).toBe(5405); // subtotal + tax + shipping (5000 + 400 + 5)
     });
 
     it('CR-007: Reducer maintains immutability', () => {
@@ -82,8 +83,9 @@ describe('Cart Reducer Tests', () => {
       expect(state.items).toHaveLength(1);
       expect(state.items[0].id).toBe('item1');
       expect(state.items[0].quantity).toBe(1);
-      expect(state.total).toBe(1000);
       expect(state.subtotal).toBe(1000);
+      expect(state.tax).toBe(80); // 8% of 1000
+      expect(state.total).toBe(1085); // 1000 + 80 + 5 (shipping)
     });
 
     it('CR-003: ADD_ITEM action updates quantity for existing item', () => {
@@ -107,7 +109,9 @@ describe('Cart Reducer Tests', () => {
 
       expect(updatedState.items).toHaveLength(1);
       expect(updatedState.items[0].quantity).toBe(3); // 1 + 2
-      expect(updatedState.total).toBe(3000);
+      expect(updatedState.subtotal).toBe(3000);
+      expect(updatedState.tax).toBe(240); // 8% of 3000
+      expect(updatedState.total).toBe(3245); // 3000 + 240 + 5
     });
   });
 
@@ -136,8 +140,9 @@ describe('Cart Reducer Tests', () => {
 
       expect(updatedState.items).toHaveLength(1);
       expect(updatedState.items[0].id).toBe('item2');
-      expect(updatedState.total).toBe(4000); // 2000 * 2
-      expect(updatedState.subtotal).toBe(4000);
+      expect(updatedState.subtotal).toBe(4000); // 2000 * 2
+      expect(updatedState.tax).toBe(320); // 8% of 4000
+      expect(updatedState.total).toBe(4325); // 4000 + 320 + 5
     });
 
     it('CR-007: Reducer maintains immutability on remove', () => {
@@ -179,8 +184,9 @@ describe('Cart Reducer Tests', () => {
       }));
 
       expect(updatedState.items[0].quantity).toBe(5);
-      expect(updatedState.total).toBe(5000);
       expect(updatedState.subtotal).toBe(5000);
+      expect(updatedState.tax).toBe(400); // 8% of 5000
+      expect(updatedState.total).toBe(5405); // 5000 + 400 + 5
     });
 
     it('CR-003: UPDATE_QUANTITY maintains immutability', () => {

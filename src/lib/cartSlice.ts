@@ -1,5 +1,111 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
 import CartPersistenceService, { CartData } from './cartPersistence';
+import {
+  getOrCreateCart as apiGetOrCreateCart,
+  addItemToCart as apiAddItemToCart,
+  updateCartItem as apiUpdateCartItem,
+  removeCartItem as apiRemoveCartItem,
+  Cart as ApiCart,
+} from '../api/cart';
+
+// Async Thunks for API Integration
+
+/**
+ * Initialize cart - loads from API or creates new one
+ */
+export const initializeCart = createAsyncThunk(
+  'cart/initialize',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await apiGetOrCreateCart();
+      return response.cart;
+    } catch (error) {
+      return rejectWithValue(error instanceof Error ? error.message : 'Failed to initialize cart');
+    }
+  }
+);
+
+/**
+ * Add item to cart via API
+ */
+export const addItemAsync = createAsyncThunk(
+  'cart/addItemAsync',
+  async (
+    { cartId, variantId, quantity }: { cartId: string; variantId: string; quantity: number },
+    { rejectWithValue }
+  ) => {
+    try {
+      const response = await apiAddItemToCart(cartId, variantId, quantity);
+      return response.cart;
+    } catch (error) {
+      return rejectWithValue(error instanceof Error ? error.message : 'Failed to add item');
+    }
+  }
+);
+
+/**
+ * Update item quantity via API
+ */
+export const updateItemQuantityAsync = createAsyncThunk(
+  'cart/updateItemQuantityAsync',
+  async (
+    { cartId, itemId, quantity }: { cartId: string; itemId: string; quantity: number },
+    { rejectWithValue }
+  ) => {
+    try {
+      const response = await apiUpdateCartItem(cartId, itemId, quantity);
+      return response.cart;
+    } catch (error) {
+      return rejectWithValue(error instanceof Error ? error.message : 'Failed to update quantity');
+    }
+  }
+);
+
+/**
+ * Remove item from cart via API
+ */
+export const removeItemAsync = createAsyncThunk(
+  'cart/removeItemAsync',
+  async (
+    { cartId, itemId }: { cartId: string; itemId: string },
+    { rejectWithValue }
+  ) => {
+    try {
+      const response = await apiRemoveCartItem(cartId, itemId);
+      return response.cart;
+    } catch (error) {
+      return rejectWithValue(error instanceof Error ? error.message : 'Failed to remove item');
+    }
+  }
+);
+
+// Helper to transform API cart to local format
+const transformApiCartToLocal = (apiCart: ApiCart): CartState => {
+  return {
+    items: apiCart.items.map(item => ({
+      id: item.variant_id,
+      title: item.title,
+      handle: '', // Will need to be populated from product data
+      price: item.unit_price,
+      original_price: item.original_price,
+      image: item.thumbnail || '',
+      quantity: item.quantity,
+      variant: {
+        sku: item.variant.sku,
+        price: item.unit_price,
+        options: item.variant.options.reduce((acc, opt, idx) => {
+          acc[`option_${idx}`] = opt;
+          return acc;
+        }, {} as { [key: string]: string }),
+      },
+    })),
+    subtotal: apiCart.subtotal,
+    total: apiCart.total,
+    shipping: apiCart.shipping_total || 5.00,
+    tax: apiCart.tax_total || 0,
+    discount: apiCart.discount_total || 0,
+  };
+};
 
 export interface CartItem {
   id: string;
@@ -34,14 +140,19 @@ const initialState: CartState = {
   tax: 0
 };
 
+const calculateTotals = (state: CartState) => {
+  state.subtotal = state.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  state.tax = state.subtotal * 0.08; // 8% tax
+  state.total = state.subtotal + state.shipping + state.tax;
+};
+
 const cartSlice = createSlice({
   name: 'cart',
   initialState,
   reducers: {
     setCartItems: (state, action: PayloadAction<CartItem[]>) => {
       state.items = action.payload;
-      state.total = action.payload.reduce((sum, item) => sum + item.price * item.quantity, 0);
-      state.subtotal = state.total;
+      calculateTotals(state);
     },
     addCartItem: (state, action: PayloadAction<CartItem>) => {
       const existingItem = state.items.find(item => item.id === action.payload.id);
@@ -50,26 +161,80 @@ const cartSlice = createSlice({
       } else {
         state.items.push(action.payload);
       }
-      state.total = state.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
-      state.subtotal = state.total;
+      calculateTotals(state);
     },
     removeCartItem: (state, action: PayloadAction<string>) => {
       state.items = state.items.filter(item => item.id !== action.payload);
-      state.total = state.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
-      state.subtotal = state.total;
+      calculateTotals(state);
     },
     updateCartItemQuantity: (state, action: PayloadAction<{ id: string; quantity: number }>) => {
       const item = state.items.find(i => i.id === action.payload.id);
       if (item) {
         item.quantity = action.payload.quantity;
-        state.total = state.items.reduce((sum, i) => sum + i.price * i.quantity, 0);
-        state.subtotal = state.total;
+        calculateTotals(state);
       }
+    },
+    setShipping: (state, action: PayloadAction<number>) => {
+      state.shipping = action.payload;
+      calculateTotals(state);
+    },
+    clearCart: (state) => {
+      state.items = [];
+      state.subtotal = 0;
+      state.tax = 0;
+      state.total = 0;
+      state.discount = 0;
     }
+  },
+  extraReducers: (builder) => {
+    // Initialize cart
+    builder.addCase(initializeCart.fulfilled, (state, action) => {
+      const cartData = transformApiCartToLocal(action.payload);
+      state.items = cartData.items;
+      state.subtotal = cartData.subtotal;
+      state.total = cartData.total;
+      state.shipping = cartData.shipping;
+      state.tax = cartData.tax;
+      state.discount = cartData.discount;
+    });
+
+    // Add item via API
+    builder.addCase(addItemAsync.fulfilled, (state, action) => {
+      const cartData = transformApiCartToLocal(action.payload);
+      state.items = cartData.items;
+      state.subtotal = cartData.subtotal;
+      state.total = cartData.total;
+      state.shipping = cartData.shipping;
+      state.tax = cartData.tax;
+      state.discount = cartData.discount;
+    });
+
+    // Update quantity via API
+    builder.addCase(updateItemQuantityAsync.fulfilled, (state, action) => {
+      const cartData = transformApiCartToLocal(action.payload);
+      state.items = cartData.items;
+      state.subtotal = cartData.subtotal;
+      state.total = cartData.total;
+    });
+
+    // Remove item via API
+    builder.addCase(removeItemAsync.fulfilled, (state, action) => {
+      const cartData = transformApiCartToLocal(action.payload);
+      state.items = cartData.items;
+      state.subtotal = cartData.subtotal;
+      state.total = cartData.total;
+    });
   }
 });
 
-export const { setCartItems, addCartItem, removeCartItem, updateCartItemQuantity } = cartSlice.actions;
+export const {
+  setCartItems,
+  addCartItem,
+  removeCartItem,
+  updateCartItemQuantity,
+  setShipping,
+  clearCart
+} = cartSlice.actions;
 
 // Action creators for test utilities
 export const createAddItemAction = (productId: string, quantity: number, options: Record<string, string> = {}) => ({
