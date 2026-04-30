@@ -7,7 +7,9 @@
 import React from 'react';
 import { useCart } from '../../hooks/useCart';
 import { useRemoveCartItem, useUpdateCartItem } from '../../hooks/useCart';
-import { AppImage } from '../ui/AppImage';
+import AppImage from '../ui/AppImage';
+import QuantitySelector from '../ui/QuantitySelector';
+import Price from '../ui/Price';
 
 interface MiniCartProps {
   open: boolean;
@@ -81,36 +83,26 @@ const MiniCart: React.FC<MiniCartProps> = ({ open, onClose }) => {
                   {item.variant?.title || 'Default'}
                 </p>
 
-                {/* Quantity Controls */}
-                <div className="flex items-center mt-1">
-                  <button
-                    onClick={() => handleQuantityChange(item.id, Math.max(1, item.quantity - 1))}
-                    disabled={item.quantity <= 1}
-                    className="w-8 h-8 flex items-center justify-center text-ink-40 hover:bg-gray-100 rounded"
-                  >
-                    −
-                  </button>
-                  <span className="mx-2 w-8 text-center">{item.quantity}</span>
-                  <button
-                    onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
-                    className="w-8 h-8 flex items-center justify-center text-ink-40 hover:bg-gray-100 rounded"
-                  >
-                    +
-                  </button>
-                  <button
-                    onClick={() => handleRemove(item.id)}
-                    className="ml-2 text-xs text-red-500 hover:text-red-700"
-                  >
-                    Remove
-                  </div>
-              </div>
+                 {/* Quantity Controls */}
+                 <div className="flex items-center mt-1">
+                   <QuantitySelector 
+                     value={item.quantity} 
+                     onChange={(qty) => handleQuantityChange(item.id, qty)} 
+                     min={1} 
+                     max={99}
+                   />
+                   <button
+                     onClick={() => handleRemove(item.id)}
+                     className="ml-2 text-xs text-red-500 hover:text-red-700"
+                   >
+                     Remove
+                   </div>
+                 </div>
 
-              {/* Item Price */}
-              <div className="ml-4 flex-shrink-0 text-right space-y-1">
-                <p className="text-sm font-medium">
-                  ${(item.unit_price * item.quantity).toFixed(2)}
-                </p>
-              </div>
+                 {/* Item Price */}
+                 <div className="ml-4 flex-shrink-0 text-right space-y-1">
+                   <Price amount={item.unit_price * item.quantity} size="sm" />
+                 </div>
             </div>
           ))}
         </div>

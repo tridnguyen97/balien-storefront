@@ -69,8 +69,8 @@ describe('Cart Integration Tests', () => {
     expect(quantities2.length).toBeGreaterThanOrEqual(1);
 
     // Check prices - use getAllByText since they appear in multiple places
-    expect(screen.getAllByText('$1000.00').length).toBeGreaterThanOrEqual(1);
-    expect(screen.getAllByText('$4000.00').length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText('$1000.00 USD').length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText('$4000.00 USD').length).toBeGreaterThanOrEqual(1);
   });
 
   it('IT-002: Calculates totals correctly', () => {

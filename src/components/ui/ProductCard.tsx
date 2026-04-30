@@ -6,8 +6,8 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { AppImage } from './AppImage';
-import { Price } from './Price';
+import AppImage from './AppImage';
+import Price from './Price';
 
 interface ProductCardProps {
   product: {

@@ -3,6 +3,10 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { message } from 'antd';
 import { addCartItem } from '../lib/cartSlice';
+import ProductGallery from '../components/product/ProductGallery';
+import QuantitySelector from '../components/ui/QuantitySelector';
+import Price from '../components/ui/Price';
+import Breadcrumb from '../components/ui/Breadcrumb';
 
 interface Variant {
   options: { [key: string]: string };
@@ -18,6 +22,7 @@ interface Product {
   price: number;
   original_price?: number;
   image: string;
+  images?: { url: string; alt?: string }[];
   description: string;
   variants: Variant[];
   in_stock: boolean;
@@ -47,6 +52,12 @@ const ProductDetail: React.FC = () => {
       price: 185.00,
       original_price: 220.00,
       image: '/mock-product-1.jpg',
+      images: [
+        { url: '/mock-product-1.jpg', alt: 'Elegant Sinamai Fascinator - Front view' },
+        { url: '/mock-product-1.jpg', alt: 'Elegant Sinamai Fascinator - Side view' },
+        { url: '/mock-product-1.jpg', alt: 'Elegant Sinamai Fascinator - Detail view' },
+        { url: '/mock-product-1.jpg', alt: 'Elegant Sinamai Fascinator - Back view' }
+      ],
       description: 'Handcrafted sinamai fascinator featuring intricate pleating and elegant silhouette. Perfect for special occasions and weddings.',
       variants: [
         { id: 'v1', options: { Color: 'Ivory', Size: 'One Size' }, price: 185.00, sku: 'HAT-IV-001' },
@@ -112,44 +123,26 @@ const ProductDetail: React.FC = () => {
     );
   }
 
-  return (
-    <>
-      {contextHolder}
-      <div className="bg-[var(--cotton)] border-b border-[var(--ink-10)] py-4 mb-8">
-        <div className="max-w-7xl mx-auto px-6 md:px-10">
-          <div className="text-sm tracking-wide">
-            <span className="text-muted-dark hover:text-gold transition-colors cursor-pointer" onClick={() => navigate('/')}>Home</span>
-            <span className="mx-2">/</span>
-            <span className="text-muted-dark">{product.category}</span>
-            <span className="mx-2">/</span>
-            <span className="text-muted-dark">{product.title}</span>
-          </div>
-        </div>
-      </div>
+   return (
+     <>
+       {contextHolder}
+       <Breadcrumb
+         items={[
+           { label: 'Home', to: '/' },
+           { label: product.category, to: `/products?category=${product.category}` },
+           { label: product.title, to: `/products/${product.handle}` }
+         ]}
+       />
 
-      <section className="max-w-7xl mx-auto px-6 md:px-10 py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-          <div className="space-y-4">
-            <div className="relative aspect-square bg-[var(--ink-05)] rounded-lg overflow-hidden">
-              <img
-                src={product.image}
-                alt={product.title}
-                className="object-cover w-full h-full"
-                loading="lazy"
-              />
-            </div>
-            <div className="grid grid-cols-3 gap-3">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="aspect-square bg-[var(--ink-05)] rounded-lg overflow-hidden">
-                  <img
-                    src={product.image}
-                    alt={`Product detail ${i}`}
-                    className="object-cover w-full h-full"
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
+       <section className="max-w-7xl mx-auto px-6 md:px-10 py-12">
+         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+           <div className="space-y-4">
+             <ProductGallery 
+               images={product.images || [{ url: product.image, alt: product.title }]}
+               mainImageUrl={product.image}
+               enableZoom={true}
+             />
+           </div>
 
           <div className="space-y-6">
             <div>
@@ -161,16 +154,12 @@ const ProductDetail: React.FC = () => {
               <p className="text-muted-dark text-sm leading-relaxed">{product.description}</p>
             </div>
 
-            <div className="flex items-baseline mb-6">
-              <span className="font-display italic text-4xl font-light text-gold">
-                ${product.price.toFixed(2)}
-              </span>
-              {product.original_price && (
-                <span className="text-lg text-muted-dark line-through ml-3">
-                  ${product.original_price.toFixed(2)}
-                </span>
-              )}
-            </div>
+             <div className="flex items-baseline mb-6">
+               <Price amount={product.price} size="xl" />
+               {product.original_price && (
+                 <Price amount={product.original_price} size="lg" showCurrencySymbol={false} className="line-through ml-3 text-muted-dark" />
+               )}
+             </div>
 
             <div className="mb-6">
               <h3 className="text-sm font-medium tracking-wide text-muted-dark mb-3">Select Options</h3>
@@ -198,24 +187,15 @@ const ProductDetail: React.FC = () => {
               </div>
             </div>
 
-            <div className="mb-6">
-              <label className="block text-sm font-medium tracking-wide text-muted-dark mb-2">Quantity</label>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                  className="w-9 h-9 flex items-center justify-center bg-[var(--ink-05)] rounded border border-[var(--ink-10)] hover:bg-[var(--ink-10)] transition-colors"
-                >
-                  <span className="text-sm font-medium">−</span>
-                </button>
-                <span className="text-base font-medium min-w-[24px] text-center">{quantity}</span>
-                <button
-                  onClick={() => setQuantity(quantity + 1)}
-                  className="w-9 h-9 flex items-center justify-center bg-[var(--ink-05)] rounded border border-[var(--ink-10)] hover:bg-[var(--ink-10)] transition-colors"
-                >
-                  <span className="text-sm font-medium">+</span>
-                </button>
-              </div>
-            </div>
+             <div className="mb-6">
+               <label className="block text-sm font-medium tracking-wide text-muted-dark mb-2">Quantity</label>
+               <QuantitySelector 
+                 value={quantity} 
+                 onChange={setQuantity} 
+                 min={1} 
+                 max={99}
+               />
+             </div>
 
             <div className="space-y-3">
               <button

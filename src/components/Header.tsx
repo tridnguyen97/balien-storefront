@@ -9,7 +9,7 @@ interface Category {
   slug: string;
 }
 
-});
+const Header: React.FC = () => {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
